@@ -14,7 +14,7 @@ from create_bot import bot, dp, scheduler, logger, register_global_middlewares, 
 async def main():
     logger.info("Starting bot")
     scheduler_jobs()
-    rds.redis_start()
+    # rds.redis_start()
     dp.include_routers(root_router, admin_router, moderator_router, user_router, echo_router)
 
     try:
