@@ -11,6 +11,7 @@ from aiogram.utils.chat_action import ChatActionSender
 from create_bot import config, bot
 from tgbot.keyboards.inline import UserInlineKeyboard as inline_kb
 from tgbot.keyboards.reply import UserReplyKeyboard
+from tgbot.misc.file_sender import file_sender
 from tgbot.misc.states import UserFSM
 from tgbot.misc.texter import texter
 from tgbot.models.redis_connector import RedisConnector as rds
@@ -53,6 +54,7 @@ async def user_start(message: Message, state: FSMContext):
     username = message.from_user.username
     if not username:
         username = ""
+    # todo Раскоментить на релиз
     # check_user = await UserDAO.get_one_or_none(user_id=user_id)
     # if not check_user:
     #     await UserDAO.create(user_id=user_id, username=username)
@@ -61,7 +63,6 @@ async def user_start(message: Message, state: FSMContext):
     kb = inline_kb.first_instr_kb(text_list=text_list)
     await RemindsDAO.delete(user_id=user_id)
     await RemindsDAO.create(ticket_hash="0", user_id=user_id)
-
     async with ChatActionSender.typing(chat_id=message.chat.id):
         await asyncio.sleep(time_typing)
         await message.answer(text, reply_markup=kb)
@@ -100,7 +101,6 @@ async def branch_clb(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer(text, reply_markup=kb)
 
 
-@router.callback_query(F.data == "restart_branch")
 @router.callback_query(F.data.split(":")[0] == "personal")
 async def personal_access(callback: CallbackQuery, state: FSMContext):
     personal = callback.data.split(':')[1]
@@ -147,17 +147,20 @@ async def get_auto_phone(message: Message, state: FSMContext):
         await message.answer(text, reply_markup=kb)
 
 
-# !!!!!!!!!!!!!!!!!!!!! Тут роутер кнопки нет
-
-
 @router.message(F.text, UserFSM.phone_method)
 async def manual_phone(message: Message, state: FSMContext):
-    text_list = await TextsDAO.get_user_texts(branch="A", chapter="manual_phone")
-    text = texter(text_list, 'message')
-    await state.set_state(UserFSM.manual_phone)
+    if message.text == "Ввести телефон вручную":
+        text_list = await TextsDAO.get_user_texts(branch="A", chapter="manual_phone")
+        text = texter(text_list, 'message')
+        kb = None
+        await state.set_state(UserFSM.manual_phone)
+    else:
+        text_list = await TextsDAO.get_user_texts(branch="A", chapter="ref_pers")
+        text = texter(text_list, 'message')
+        kb = inline_kb.second_instr_kb(text_list=text_list)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
         await asyncio.sleep(time_typing)
-        await message.answer(text)
+        await message.answer(text, reply_markup=kb)
 
 
 @router.message(F.text, UserFSM.manual_phone)
@@ -253,8 +256,8 @@ async def request_photo(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer(text, reply_markup=kb)
 
 
-# @router.message(UserFSM.photo)
-@router.message()
+@router.message(UserFSM.photo)
+# @router.message()
 async def get_album(message: types, state: FSMContext, album: List[Message] = None):
     state_data = await state.get_data()
     branch = state_data["branch"]
@@ -307,3 +310,35 @@ async def get_album(message: types, state: FSMContext, album: List[Message] = No
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
         await asyncio.sleep(time_typing)
         await message.answer(text, reply_markup=kb)
+
+
+@router.callback_query(F.data.split(":")[0] == "answer_admin")
+async def answer_start(callback: CallbackQuery, state: FSMContext):
+    admin_id = callback.data.split(':')[1]
+    await state.update_data(admin_id=admin_id)
+    text_list = await TextsDAO.get_user_texts(branch="X", chapter="dialog")
+    text = texter(text_list, 'message')
+    await state.set_state(UserFSM.dialog)
+    await callback.message.answer(text)
+    await bot.answer_callback_query(callback.id)
+
+
+@router.message(UserFSM.dialog)
+async def answer_finish(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    username = f'@{message.from_user.username}' if message.from_user.username else ""
+    state_data = await state.get_data()
+    admin_id = state_data["admin_id"]
+    admin_kb = inline_kb.admin_answer_kb(user_id)
+    if message.content_type == 'text':
+        text = f'{username}\n\n{message.text}'
+        await bot.send_message(admin_id, text, reply_markup=admin_kb)
+    else:
+        text = f'{username}\n\n{message.caption}'
+        content_type = message.content_type
+        if message.photo:
+            file_id = message.photo[-1].file_id
+        else:
+            obj_dict = message.dict()
+            file_id = obj_dict[message.content_type]['file_id']
+        await file_sender(file_id, content_type, admin_id, caption=text, kb=admin_kb)

@@ -29,3 +29,5 @@ yarl==1.8.1
 
 betterlogging~=0.2.1
 SQLAlchemy~=2.0.15
+asyncpg~=0.27.0
+openpyxl~=2.2.6

@@ -85,7 +85,14 @@ class UserInlineKeyboard:
     def restart_branch_kb(cls, text_list: list):
         button_return_text = texter(text_list, 'button_return')
         keyboard = [
-            [InlineKeyboardButton(text=button_return_text, callback_data="restart_branch")],
+            [InlineKeyboardButton(text=button_return_text, callback_data="branch_A")],
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+    @classmethod
+    def admin_answer_kb(cls, user_id: int):
+        keyboard = [
+            [InlineKeyboardButton(text='📞 Ответить клиенту', callback_data=f'dialog:{user_id}')],
         ]
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
@@ -256,7 +263,7 @@ class AdminInlineKeyboard(InlineKeyboardMarkup):
             },
             'dialog': {
                 'Сообщение': 'message',
-                'Кн. ОТВЕТИТЬ': 'return'
+                'Кн. ОТВЕТИТЬ': 'button_answer'
             }
         }
         chapter_dict = subjects[chapter]
@@ -287,3 +294,43 @@ class AdminInlineKeyboard(InlineKeyboardMarkup):
             ],
         ]
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+    @classmethod
+    def mailing_group_kb(cls):
+        keyboard = [
+            [InlineKeyboardButton(text='Ветка А', callback_data='mailing:A')],
+            [InlineKeyboardButton(text='Ветка B', callback_data='mailing:B')],
+            [InlineKeyboardButton(text='Все пользователи', callback_data='mailing:all')],
+            [InlineKeyboardButton(text='🏠 На главный экран', callback_data='home')],
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+    @classmethod
+    def db_branch_kb(cls):
+        keyboard = [
+            [InlineKeyboardButton(text='Ветка А', callback_data='db:branch|branch:A')],
+            [InlineKeyboardButton(text='Ветка B', callback_data='db:branch|branch:B')],
+            [InlineKeyboardButton(text='Все обращения', callback_data='db:branch|branch:all')],
+            [InlineKeyboardButton(text='🏠 На главный экран', callback_data='home')],
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+    @classmethod
+    def db_period_kb(cls, branch: str):
+        keyboard = [
+            [InlineKeyboardButton(text='1 Неделя', callback_data=f'db:period|branch:{branch}|period:week')],
+            [InlineKeyboardButton(text='1 Месяц', callback_data=f'db:period|branch:{branch}|period:month')],
+            [InlineKeyboardButton(text='За всё время', callback_data=f'db:period|branch:{branch}|period:infinity')],
+            [InlineKeyboardButton(text='🏠 На главный экран', callback_data='home')],
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+    @classmethod
+    def user_answer_kb(cls, text_list: list, admin_id: int):
+        answer_text = texter(text_list, 'button_answer')
+        keyboard = [
+            [InlineKeyboardButton(text=answer_text, callback_data=f'answer_admin:{admin_id}')],
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+

@@ -1,3 +1,6 @@
+# import datetime
+from datetime import datetime
+
 from sqlalchemy import MetaData, inspect, Column, String, insert, select, Integer, TIMESTAMP, Text, update, delete, \
     DateTime, JSON
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -102,7 +105,7 @@ class BaseDAO:
     @classmethod
     async def get_many(cls, **filter_by) -> list:
         async with async_session_maker() as session:
-            query = select(cls.model.model.__table__.columns).filter_by(**filter_by)
+            query = select(cls.model.__table__.columns).filter_by(**filter_by)
             result = await session.execute(query)
             return result.mappings().all()
 
@@ -147,9 +150,34 @@ class TextsDAO(BaseDAO):
 class RemindsDAO(BaseDAO):
     model = RemindsDB
 
+    @classmethod
+    async def update_reminds(cls):
+        async with async_session_maker() as session:
+            stmt = update(cls.model).values(day=cls.model.day + 1)
+            await session.execute(stmt)
+            await session.commit()
+
 
 class TicketsDAO(BaseDAO):
     model = TicketsDB
+
+    @classmethod
+    async def get_users_by_branch(cls, branch: str) -> list:
+        async with async_session_maker() as session:
+            query = select(cls.model.user_id).filter_by(branch=branch).distinct()
+            result = await session.execute(query)
+            return result.mappings().all()
+
+    @classmethod
+    async def get_db(cls, branch: str, period: datetime) -> list:
+        async with async_session_maker() as session:
+            if branch == "all":
+                query = select(cls.model.__table__.columns).filter(cls.model.create_timestamp > period)
+            else:
+                query = select(cls.model.__table__.columns).filter(cls.model.create_timestamp > period).\
+                    filter_by(branch=branch)
+            result = await session.execute(query)
+            return result.mappings().all()
 
 
 # class MediasDAO(BaseDAO):

@@ -5,6 +5,8 @@ class AdminFSM(StatesGroup):
     home = State()
     edit_text = State()
     ticket_id = State()
+    mailing = State()
+    dialog = State()
 
 
 class UserFSM(StatesGroup):
@@ -14,3 +16,4 @@ class UserFSM(StatesGroup):
     manual_phone = State()
     petition = State()
     photo = State()
+    dialog = State()
