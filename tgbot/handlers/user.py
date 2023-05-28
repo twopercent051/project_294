@@ -21,7 +21,7 @@ root_ids = config.tg_bot.root_ids
 
 router = Router()
 
-time_typing = 0
+time_typing = 2
 
 
 @router.message(Command("become_admin"))
@@ -55,9 +55,9 @@ async def user_start(message: Message, state: FSMContext):
     if not username:
         username = ""
     # todo Раскоментить на релиз
-    # check_user = await UserDAO.get_one_or_none(user_id=user_id)
-    # if not check_user:
-    #     await UserDAO.create(user_id=user_id, username=username)
+    check_user = await UserDAO.get_one_or_none(user_id=user_id)
+    if not check_user:
+        await UserDAO.create(user_id=user_id, username=username)
     text_list = await TextsDAO.get_user_texts(branch="X", chapter="1_instr")
     text = texter(text_list, 'message')
     kb = inline_kb.first_instr_kb(text_list=text_list)
