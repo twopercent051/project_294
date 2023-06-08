@@ -222,7 +222,7 @@ async def edition_finish(message: Message, state: FSMContext):
     if current_text is None:
         await TextsDAO.create(subject=obj_in_table, text=new_text)
     else:
-        await TextsDAO.update(cond_dict={"object": obj_in_table}, text=new_text)
+        await TextsDAO.update(subject=obj_in_table, text=new_text)
     await message.answer(text, reply_markup=kb)
 
 

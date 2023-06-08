@@ -116,12 +116,12 @@ class BaseDAO:
             await session.execute(stmt)
             await session.commit()
 
-    @classmethod
-    async def update(cls, cond_dict: dict, **data):
-        async with async_session_maker() as session:
-            stmt = update(cls.model).where(cond_dict).values(**data)
-            await session.execute(stmt)
-            await session.commit()
+    # @classmethod
+    # async def update(cls, cond_dict: dict, **data):
+    #     async with async_session_maker() as session:
+    #         stmt = update(cls.model).where(cond_dict).values(**data)
+    #         await session.execute(stmt)
+    #         await session.commit()
 
     @classmethod
     async def delete(cls, **data):
@@ -145,6 +145,13 @@ class TextsDAO(BaseDAO):
             query = select(cls.model.__table__.columns).filter(cls.model.subject.like(key))
             result = await session.execute(query)
             return result.mappings().all()
+
+    @classmethod
+    async def update(cls, subject: str, **data):
+        async with async_session_maker() as session:
+            stmt = update(cls.model).filter_by(subject=subject).values(**data)
+            await session.execute(stmt)
+            await session.commit()
 
 
 class RemindsDAO(BaseDAO):

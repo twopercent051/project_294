@@ -69,6 +69,20 @@ async def user_start(message: Message, state: FSMContext):
     await state.set_state(UserFSM.home)
 
 
+@router.callback_query(F.data == "start")
+async def start(callback: CallbackQuery, state: FSMContext):
+    user_id = str(callback.from_user.id)
+    text_list = await TextsDAO.get_user_texts(branch="X", chapter="1_instr")
+    text = texter(text_list, 'message')
+    kb = inline_kb.first_instr_kb(text_list=text_list)
+    await RemindsDAO.delete(user_id=user_id)
+    await RemindsDAO.create(ticket_hash="0", user_id=user_id)
+    async with ChatActionSender.typing(chat_id=callback.message.chat.id):
+        await asyncio.sleep(time_typing)
+        await callback.message.answer(text, reply_markup=kb)
+    await state.set_state(UserFSM.home)
+
+
 @router.callback_query(F.data.split("_")[0] == "branch")
 async def branch_clb(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
@@ -88,14 +102,14 @@ async def branch_clb(callback: CallbackQuery, state: FSMContext):
             level_1="",
             ticket_hash=ticket_hash
         )
-        text_list = await TextsDAO.get_user_texts(branch="B", chapter="2_instr")
-        text = texter(text_list, 'message')
-        async with ChatActionSender.typing(bot=bot, chat_id=callback.message.chat.id):
-            await asyncio.sleep(time_typing)
-            await callback.message.answer(text)
+        # text_list = await TextsDAO.get_user_texts(branch="B", chapter="2_instr")
+        # text = texter(text_list, 'message')
+        # async with ChatActionSender.typing(bot=bot, chat_id=callback.message.chat.id):
+        #     await asyncio.sleep(time_typing)
+        #     await callback.message.answer(text)
         text_list = await TextsDAO.get_user_texts(branch="B", chapter="level_2")
         text = texter(text_list, 'message')
-        kb = inline_kb.level_2_kb(text_list=text_list)
+        kb = inline_kb.level_2_kb(text_list=text_list, branch="B")
     async with ChatActionSender.typing(bot=bot, chat_id=callback.message.chat.id):
         await asyncio.sleep(time_typing)
         await callback.message.answer(text, reply_markup=kb)
@@ -185,7 +199,7 @@ async def level_1(callback: CallbackQuery, state: FSMContext):
     await state.update_data(level_1=clb_data)
     text_list = await TextsDAO.get_user_texts(branch="A", chapter="level_2")
     text = texter(text_list, 'message')
-    kb = inline_kb.level_2_kb(text_list=text_list)
+    kb = inline_kb.level_2_kb(text_list=text_list, branch="A")
     await bot.answer_callback_query(callback.id)
     async with ChatActionSender.typing(bot=bot, chat_id=callback.message.chat.id):
         await asyncio.sleep(time_typing)
@@ -249,7 +263,7 @@ async def request_photo(callback: CallbackQuery, state: FSMContext):
             media=[]
         )
     text = texter(text_list, 'message')
-    kb = inline_kb.restart_branch_kb(text_list)
+    kb = inline_kb.restart_a_kb(text_list)
     await bot.answer_callback_query(callback.id)
     async with ChatActionSender.typing(bot=bot, chat_id=callback.message.chat.id):
         await asyncio.sleep(time_typing)
@@ -293,7 +307,7 @@ async def get_album(message: types, state: FSMContext, album: List[Message] = No
         media_list.append(media_dict)
     text_list = await TextsDAO.get_user_texts(branch=branch, chapter="gratitude")
     text = texter(text_list, 'message')
-    kb = inline_kb.restart_branch_kb(text_list)
+    kb = inline_kb.restart_a_kb(text_list)
     await TicketsDAO.create(
         user_id=str(message.from_user.id),
         username=username,

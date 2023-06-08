@@ -34,21 +34,14 @@ async def daily_db():
         # except BotBlocked:
         #     logger.info(f'Bot blocked by admin {admin["username"]}')
         except Exception as ex:
-            logger.info(f'Bot blocked by admin {admin}')
-    # for root in root_id:
-    #     try:
-    #         await bot.send_document(chat_id=root, document=open(doc_path, 'rb'), reply_markup=kb)
-    #     except ChatNotFound:
-    #         logger.info(f"Bot deleted by root {root_id}")
-    #     except BotBlocked:
-    #         logger.info(f'Bot blocked by root {root_id}')
+            logger.info(f'Bot blocked by admin {admin} | {ex}')
 
 
 async def reminder():
     reminds = await RemindsDAO.get_many()
     text_list = await TextsDAO.get_user_texts(branch="X", chapter="remind")
     text = texter(text_list, 'message')
-    kb = UserInlineKeyboard.restart_branch_kb(text_list)
+    kb = UserInlineKeyboard.restart_b_kb(text_list)
     for remind in reminds:
         day = remind['day']
         user_id = remind['user_id']

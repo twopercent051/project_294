@@ -52,7 +52,7 @@ class UserInlineKeyboard:
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
     @classmethod
-    def level_2_kb(cls, text_list: list):
+    def level_2_kb(cls, text_list: list, branch: str):
         button_1_text = texter(text_list, 'button_1')
         button_2_text = texter(text_list, 'button_2')
         button_3_text = texter(text_list, 'button_3')
@@ -65,8 +65,11 @@ class UserInlineKeyboard:
             [InlineKeyboardButton(text=button_3_text, callback_data=f'level_2:{button_3_text}')],
             [InlineKeyboardButton(text=button_4_text, callback_data=f'level_2:{button_4_text}')],
             [InlineKeyboardButton(text=button_5_text, callback_data=f'level_2:{button_5_text}')],
-            [InlineKeyboardButton(text=button_return_text, callback_data="restart_branch")],
         ]
+        if branch == "A":
+            keyboard.append([InlineKeyboardButton(text=button_return_text, callback_data="restart_branch")])
+        else:
+            keyboard.append([InlineKeyboardButton(text=button_return_text, callback_data="start")])
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
     @classmethod
@@ -82,10 +85,18 @@ class UserInlineKeyboard:
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
     @classmethod
-    def restart_branch_kb(cls, text_list: list):
+    def restart_a_kb(cls, text_list: list):
         button_return_text = texter(text_list, 'button_return')
         keyboard = [
             [InlineKeyboardButton(text=button_return_text, callback_data="branch_A")],
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+    @classmethod
+    def restart_b_kb(cls, text_list: list):
+        button_return_text = texter(text_list, 'button_return')
+        keyboard = [
+            [InlineKeyboardButton(text=button_return_text, callback_data="start")],
         ]
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
@@ -178,7 +189,6 @@ class AdminInlineKeyboard(InlineKeyboardMarkup):
                 'Благодарность': 'gratitude',
             },
             "B": {
-                'Вторая инструкция': '2_instr',
                 'Уровень 2': 'level_2',
                 'Просьба обращения': 'petition',
                 'Запрос фото': 'req_photo',
