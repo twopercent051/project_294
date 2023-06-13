@@ -42,12 +42,12 @@ class UserInlineKeyboard:
         button_1_text = texter(text_list, 'button_1')
         button_2_text = texter(text_list, 'button_2')
         button_3_text = texter(text_list, 'button_3')
-        button_return_text = texter(text_list, 'button_return')
+        button_return_text = texter(text_list, 'return')
         keyboard = [
             [InlineKeyboardButton(text=button_1_text, callback_data=f'level_1:{button_1_text}')],
             [InlineKeyboardButton(text=button_2_text, callback_data=f'level_1:{button_2_text}')],
             [InlineKeyboardButton(text=button_3_text, callback_data=f'level_1:{button_3_text}')],
-            [InlineKeyboardButton(text=button_return_text, callback_data="restart_branch")],
+            [InlineKeyboardButton(text=button_return_text, callback_data="branch_A")],
         ]
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
@@ -58,7 +58,7 @@ class UserInlineKeyboard:
         button_3_text = texter(text_list, 'button_3')
         button_4_text = texter(text_list, 'button_4')
         button_5_text = texter(text_list, 'button_5')
-        button_return_text = texter(text_list, 'button_return')
+        button_return_text = texter(text_list, 'return')
         keyboard = [
             [InlineKeyboardButton(text=button_1_text, callback_data=f'level_2:{button_1_text}')],
             [InlineKeyboardButton(text=button_2_text, callback_data=f'level_2:{button_2_text}')],
@@ -67,26 +67,29 @@ class UserInlineKeyboard:
             [InlineKeyboardButton(text=button_5_text, callback_data=f'level_2:{button_5_text}')],
         ]
         if branch == "A":
-            keyboard.append([InlineKeyboardButton(text=button_return_text, callback_data="restart_branch")])
+            keyboard.append([InlineKeyboardButton(text=button_return_text, callback_data="branch_A")])
         else:
             keyboard.append([InlineKeyboardButton(text=button_return_text, callback_data="start")])
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
     @classmethod
-    def request_photo_kb(cls, text_list: list):
+    def request_photo_kb(cls, text_list: list, branch: str):
         yes_text = texter(text_list, 'button_yes')
         no_text = texter(text_list, 'button_no')
-        button_return_text = texter(text_list, 'button_return')
+        button_return_text = texter(text_list, 'return')
         keyboard = [
             [InlineKeyboardButton(text=yes_text, callback_data="photo:yes")],
             [InlineKeyboardButton(text=no_text, callback_data="photo:no")],
-            [InlineKeyboardButton(text=button_return_text, callback_data="restart_branch")],
         ]
+        if branch == "A":
+            keyboard.append([InlineKeyboardButton(text=button_return_text, callback_data="branch_A")])
+        else:
+            keyboard.append([InlineKeyboardButton(text=button_return_text, callback_data="start")])
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
     @classmethod
     def restart_a_kb(cls, text_list: list):
-        button_return_text = texter(text_list, 'button_return')
+        button_return_text = texter(text_list, 'return')
         keyboard = [
             [InlineKeyboardButton(text=button_return_text, callback_data="branch_A")],
         ]
@@ -94,7 +97,7 @@ class UserInlineKeyboard:
 
     @classmethod
     def restart_b_kb(cls, text_list: list):
-        button_return_text = texter(text_list, 'button_return')
+        button_return_text = texter(text_list, 'return')
         keyboard = [
             [InlineKeyboardButton(text=button_return_text, callback_data="start")],
         ]

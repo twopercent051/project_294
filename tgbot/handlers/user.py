@@ -121,7 +121,7 @@ async def personal_access(callback: CallbackQuery, state: FSMContext):
     if personal == 'no':
         text_list = await TextsDAO.get_user_texts(branch="A", chapter="ref_pers")
         text = texter(text_list, 'message')
-        kb = inline_kb.second_instr_kb(text_list=text_list)
+        kb = inline_kb.restart_a_kb(text_list=text_list)
     else:
         user_id = callback.from_user.id
         ticket_hash = f'{int(datetime.utcnow().timestamp())}_{user_id}'
@@ -161,6 +161,16 @@ async def get_auto_phone(message: Message, state: FSMContext):
         await message.answer(text, reply_markup=kb)
 
 
+@router.message(F.text == "В начало")
+async def return_by_reply(message: Message):
+    text_list = await TextsDAO.get_user_texts(branch="A", chapter="ref_pers")
+    text = texter(text_list, 'message')
+    kb = inline_kb.restart_a_kb(text_list=text_list)
+    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+        await asyncio.sleep(time_typing)
+        await message.answer(text, reply_markup=kb)
+
+
 @router.message(F.text, UserFSM.phone_method)
 async def manual_phone(message: Message, state: FSMContext):
     if message.text == "Ввести телефон вручную":
@@ -168,10 +178,12 @@ async def manual_phone(message: Message, state: FSMContext):
         text = texter(text_list, 'message')
         kb = None
         await state.set_state(UserFSM.manual_phone)
+    # elif message.text == "В начало":
+    #     text_list = await TextsDAO.get_user_texts(branch="A", chapter="ref_pers")
+    #     text = texter(text_list, 'message')
+    #     kb = inline_kb.second_instr_kb(text_list=text_list)
     else:
-        text_list = await TextsDAO.get_user_texts(branch="A", chapter="ref_pers")
-        text = texter(text_list, 'message')
-        kb = inline_kb.second_instr_kb(text_list=text_list)
+        return
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
         await asyncio.sleep(time_typing)
         await message.answer(text, reply_markup=kb)
@@ -229,7 +241,7 @@ async def get_petition(message: Message, state: FSMContext):
     await state.update_data(petition=petition_text)
     text_list = await TextsDAO.get_user_texts(branch=branch, chapter="req_photo")
     text = texter(text_list, 'message')
-    kb = inline_kb.request_photo_kb(text_list=text_list)
+    kb = inline_kb.request_photo_kb(text_list=text_list, branch=branch)
     async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
         await asyncio.sleep(time_typing)
         await message.answer(text, reply_markup=kb)
