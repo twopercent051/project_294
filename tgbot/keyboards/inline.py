@@ -168,8 +168,8 @@ class AdminInlineKeyboard(InlineKeyboardMarkup):
             [InlineKeyboardButton(text='Первая инструкция', callback_data='edit:lvl_2|br:X|ch:1_instr')],
             [InlineKeyboardButton(text='Ветка А', callback_data='edit:lvl_1|br:A')],
             [InlineKeyboardButton(text='Ветка B', callback_data='edit:lvl_1|br:B')],
-            [InlineKeyboardButton(text='Напоминание', callback_data='edit:lvl_1|br:X|chapter:remind')],
-            [InlineKeyboardButton(text='Переписка с пользователем', callback_data='edit:lvl_1|br:X|chapter:dialog')],
+            [InlineKeyboardButton(text='Напоминание', callback_data='edit:lvl_2|br:X|chapter:remind')],
+            [InlineKeyboardButton(text='Переписка с пользователем', callback_data='edit:lvl_2|br:X|chapter:dialog')],
             [InlineKeyboardButton(text="🏠 На главный экран", callback_data="home")],
         ]
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
