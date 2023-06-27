@@ -48,7 +48,7 @@ async def become_admin(message: Message):
     await message.answer(text)
 
 
-@router.message(Command("start"))
+# @router.message(Command("start"))
 async def user_start(message: Message, state: FSMContext):
     user_id = str(message.from_user.id)
     username = message.from_user.username
@@ -113,6 +113,25 @@ async def branch_clb(callback: CallbackQuery, state: FSMContext):
     async with ChatActionSender.typing(bot=bot, chat_id=callback.message.chat.id):
         await asyncio.sleep(time_typing)
         await callback.message.answer(text, reply_markup=kb)
+
+
+@router.message(Command("start"))
+async def start_b(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    ticket_hash = f'{int(datetime.utcnow().timestamp())}_{user_id}'
+    await state.update_data(
+        full_name="",
+        phone_number="",
+        phone_method="",
+        level_1="",
+        ticket_hash=ticket_hash
+    )
+    text_list = await TextsDAO.get_user_texts(branch="B", chapter="level_2")
+    text = texter(text_list, 'message')
+    kb = inline_kb.level_2_kb(text_list=text_list, branch="B")
+    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+        await asyncio.sleep(time_typing)
+        await message.answer(text, reply_markup=kb)
 
 
 @router.callback_query(F.data.split(":")[0] == "personal")
