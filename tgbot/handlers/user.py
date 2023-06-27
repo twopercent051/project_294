@@ -360,7 +360,7 @@ async def get_album(message: types, state: FSMContext, album: List[Message] = No
         media_list.append(media_dict)
     text_list = await TextsDAO.get_user_texts(branch=branch, chapter="gratitude")
     text = texter(text_list, 'message')
-    kb = inline_kb.restart_a_kb(text_list)
+    kb = inline_kb.restart_b_kb(text_list)
     await TicketsDAO.create(
         user_id=str(message.from_user.id),
         username=username,
