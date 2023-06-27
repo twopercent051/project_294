@@ -69,7 +69,7 @@ async def user_start(message: Message, state: FSMContext):
     await state.set_state(UserFSM.home)
 
 
-@router.callback_query(F.data == "start")
+# @router.callback_query(F.data == "start")
 async def start(callback: CallbackQuery, state: FSMContext):
     user_id = str(callback.from_user.id)
     text_list = await TextsDAO.get_user_texts(branch="X", chapter="1_instr")
@@ -115,9 +115,7 @@ async def branch_clb(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer(text, reply_markup=kb)
 
 
-@router.message(Command("start"))
-async def start_b(message: Message, state: FSMContext):
-    user_id = message.from_user.id
+async def start_b(user_id: int | str, chat_id: int | str, state: FSMContext):
     ticket_hash = f'{int(datetime.utcnow().timestamp())}_{user_id}'
     await state.update_data(
         full_name="",
@@ -129,9 +127,33 @@ async def start_b(message: Message, state: FSMContext):
     text_list = await TextsDAO.get_user_texts(branch="B", chapter="level_2")
     text = texter(text_list, 'message')
     kb = inline_kb.level_2_kb(text_list=text_list, branch="B")
-    async with ChatActionSender.typing(bot=bot, chat_id=message.chat.id):
+    await RemindsDAO.delete(user_id=user_id)
+    await RemindsDAO.create(ticket_hash="0", user_id=user_id)
+    await state.set_state(UserFSM.home)
+    async with ChatActionSender.typing(bot=bot, chat_id=chat_id):
         await asyncio.sleep(time_typing)
-        await message.answer(text, reply_markup=kb)
+        await bot.send_message(chat_id=user_id, text=text, reply_markup=kb)
+
+
+@router.message(Command("start"))
+async def start_b_msg(message: Message, state: FSMContext):
+    user_id = str(message.from_user.id)
+    username = message.from_user.username
+    if not username:
+        username = ""
+    check_user = await UserDAO.get_one_or_none(user_id=user_id)
+    if not check_user:
+        await UserDAO.create(user_id=user_id, username=username)
+    await state.update_data(branch="B")
+    chat_id = message.chat.id
+    await start_b(user_id=user_id, chat_id=chat_id, state=state)
+
+
+@router.callback_query(F.data == "start")
+async def start_b_clb(callback: CallbackQuery, state: FSMContext):
+    user_id = str(callback.from_user.id)
+    chat_id = callback.message.chat.id
+    await start_b(user_id=user_id, chat_id=chat_id, state=state)
 
 
 @router.callback_query(F.data.split(":")[0] == "personal")
